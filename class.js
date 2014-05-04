@@ -21,14 +21,18 @@ function Class(param,parent) {
     child.__super__ = parent;
     
     //b.super --> B --> b.prototype --> new ctor --> a.prtootype
-    var _child = child;
+    var current_class = child;
     child.prototype.super = function(){
         //
-        if(_child.__super__.prototype[arguments[0]] !== undefined) 
+
+        if(current_class.__super__.prototype[arguments[0]] !== undefined) 
         {
             //对于this.super("foo",a*10,b*100)要去掉第一个参数，然后再把后两个参数传递给父类相关的方法
             var args = Array.prototype.slice.call(arguments,1);
-            var result = _child.__super__.prototype[arguments[0]].apply(this,args);
+            //修复无限递归
+            current_class = current_class.__super__;
+            var result = current_class.prototype[arguments[0]].apply(this,args);
+            current_class = child;
             return result;
         } 
         else 
